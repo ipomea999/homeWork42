@@ -1,3 +1,5 @@
+package server;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -19,34 +21,32 @@ public class EchoServer {
     }
 
     public void run() {
-        try (var server = new ServerSocket(port)) {
-            try (var clientSocket = server.accept()) {
+        try (ServerSocket server = new ServerSocket(port)) {
+            try (Socket clientSocket = server.accept()) {
                 handle(clientSocket);
             }
         } catch (IOException e) {
-            var formatMsg = "Вероятнее всего порт %s занят.%n";
+            String formatMsg = "Вероятнее всего порт %s занят.%n";
             System.out.printf(formatMsg, port);
             e.printStackTrace();
         }
     }
 
     private void handle(Socket socket) throws IOException {
-        var input = socket.getInputStream();
-        var isr = new InputStreamReader(input, "UTF-8");
-        var output = socket.getOutputStream();
-        var writer = new PrintWriter(output);
-        try (var scanner = new Scanner(isr); writer) {
+        try (Scanner scanner = new Scanner(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
+
             while (true) {
-                var message = scanner.nextLine().strip();
+                String message = scanner.nextLine().strip();
                 System.out.printf("Got: %s%n", message);
+
                 if (message.toLowerCase().equals("bye")) {
                     System.out.println("Bye bye");
                     return;
                 }
-                var reversed = new StringBuilder(message).reverse().toString();
-                writer.write(reversed);
-                writer.write(System.lineSeparator());
-                writer.flush();
+
+                String reversedMessage = new StringBuilder(message).reverse().toString();
+                writer.println(reversedMessage);
             }
         } catch (NoSuchElementException ex) {
             System.out.println("Client dropped connection");
