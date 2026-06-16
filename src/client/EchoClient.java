@@ -1,4 +1,4 @@
-package task2.client;
+package client;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
